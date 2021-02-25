@@ -5,6 +5,7 @@ from cuenca_validations.types import (
     TransferNetwork,
     TransferQuery,
     TransferRequest,
+    TransactionStatus,
 )
 from cuenca_validations.typing import DictStrAny
 from pydantic import validator
@@ -31,10 +32,11 @@ class Transfer(Transaction, Creatable):
     destination_uri: Optional[str]  # defined after confirmation of receipt
 
     @validator('destination_uri')
-    def destination_uri_must_be_succeed(self):
-        if self.status == 'succeed':
-            if self.destination_uri is None:
+    def destination_uri_must_be_succeed(cls, destination_uri, values):
+        if values['status'] == TransactionStatus.succeeded:
+            if destination_uri is None:
                 raise DestinationURINotDefined
+        return destination_uri
 
     @property  # type: ignore
     def destination(self) -> Optional[Account]:
